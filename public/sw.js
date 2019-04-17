@@ -1,3 +1,6 @@
+importScripts('/src/js/idb.js');
+importScripts('/src/js/idb-utils.js');
+
 const CACHE_STATIC_NAME = 'static-v1';
 const CACHE_DYNAMIC_NAME = 'dynamic-v1';
 
@@ -5,6 +8,8 @@ const STATIC_FILES = [
   '/',
   '/index.html',
   '/offline.html',
+  '/src/js/idb.js',
+  '/src/js/idb-utils.js',
   '/src/js/app.js',
   '/src/js/feed.js',
   '/src/js/material.min.js',
@@ -44,17 +49,22 @@ self.addEventListener('activate', function (event) {
 });
 
 self.addEventListener('fetch', function (event) {
-  const url = 'https://httpbin.org/get';
+  const url = 'https://pwagram-34724.firebaseio.com/posts.json';
 
-  if (event.request.url.includes(url)) { //if the request is for fetching cards we will respond via network and cache the card
-    event.respondWith(
-      caches.open(CACHE_DYNAMIC_NAME)
-      .then(function (cache) {
-        return fetch(event.request)
-          .then(function (res) {
-            cache.put(event.request, res.clone())
-            return res;
+  if (event.request.url.includes(url)) { //if the request is for fetching cards we will respond with network and update the IDB with fresh posts (clearing it first) 
+    event.respondWith(fetch(event.request)
+      .then(function (res) {
+        const clonedRes = res.clone();
+        clearAllData('posts')
+          .then(function () {
+            return clonedRes.json();
           })
+          .then(function (data) {
+            for (let key in data) {
+              writeData('posts', data[key]);
+            }
+          })
+          return res;
       })
     );
   } else if (isInArray(event.request.url, CACHE_STATIC_NAME)) { //check is request is for one of our static files, then just serve from cache, no network request required

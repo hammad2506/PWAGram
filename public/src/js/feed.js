@@ -4,11 +4,11 @@ const closeCreatePostModalButton = document.querySelector('#close-create-post-mo
 const sharedMomentsArea = document.querySelector('#shared-moments');
 
 function openCreatePostModal() {
-  createPostArea.style.display = 'block';
+    createPostArea.style.transform = 'translateY(0)';
   if (deferredPrompt) {
     deferredPrompt.prompt();
 
-    deferredPrompt.userChoice.then(function (choiceResult) {
+    deferredPrompt.userChoice.then(function(choiceResult) {
       console.log(choiceResult.outcome);
 
       if (choiceResult.outcome === 'dismissed') {
@@ -20,10 +20,19 @@ function openCreatePostModal() {
 
     deferredPrompt = null;
   }
+
+  // if ('serviceWorker' in navigator) {
+  //   navigator.serviceWorker.getRegistrations()
+  //     .then(function(registrations) {
+  //       for (var i = 0; i < registrations.length; i++) {
+  //         registrations[i].unregister();
+  //       }
+  //     })
+  // }
 }
 
 function closeCreatePostModal() {
-  createPostArea.style.display = 'none';
+  createPostArea.style.transform = 'translateY(100vh)';
 }
 
 shareImageButton.addEventListener('click', openCreatePostModal);
@@ -77,6 +86,7 @@ const url = 'https://pwagram-34724.firebaseio.com/posts.json';
 let networkDataReceived = false;
 
 function updateUI(data) {
+  clearCards();
   data.forEach(cardData => {
     createCard(cardData);
   });

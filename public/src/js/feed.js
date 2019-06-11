@@ -2,13 +2,16 @@ const shareImageButton = document.querySelector('#share-image-button');
 const createPostArea = document.querySelector('#create-post');
 const closeCreatePostModalButton = document.querySelector('#close-create-post-modal-btn');
 const sharedMomentsArea = document.querySelector('#shared-moments');
+const form = document.querySelector('form');
+const titleInput = document.querySelector('#title');
+const locationInput = document.querySelector('#location');
 
 function openCreatePostModal() {
-    createPostArea.style.transform = 'translateY(0)';
+  createPostArea.style.transform = 'translateY(0)';
   if (deferredPrompt) {
     deferredPrompt.prompt();
 
-    deferredPrompt.userChoice.then(function(choiceResult) {
+    deferredPrompt.userChoice.then(function (choiceResult) {
       console.log(choiceResult.outcome);
 
       if (choiceResult.outcome === 'dismissed') {
@@ -87,6 +90,10 @@ let networkDataReceived = false;
 
 function updateUI(data) {
   clearCards();
+  if (!data) {
+    return;
+  }
+
   data.forEach(cardData => {
     createCard(cardData);
   });
@@ -120,6 +127,67 @@ if ('indexedDB' in window) {
     })
 
 }
+
+function sendPostData() {
+  fetch('https://pwagram-34724.firebaseio.com/posts.json', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        id: new Date().toISOString(),
+        title: titleInput.value,
+        location: locationInput.value,
+        image: 'https://firebasestorage.googleapis.com/v0/b/pwagram-99adf.appspot.com/o/sf-boat.jpg?alt=media&token=19f4770c-fc8c-4882-92f1-62000ff06f16'
+      })
+    })
+    .then(function (res) {
+      console.log('Sent data', res);
+      updateUI();
+    })
+    .catch(function (err) {
+      console.log("Error in posting data", err);
+    });
+}
+
+form.addEventListener('submit', function (event) {
+  event.preventDefault();
+
+  if (titleInput.value.trim() === '' || locationInput.value.trim() === '') {
+    alert("Title and Location cannot be empty");
+    return;
+  }
+
+  closeCreatePostModal();
+
+  if ('serviceWorker' in navigator && 'SyncManager' in window) {
+    navigator.serviceWorker.ready
+      .then(function (sw) {
+        const post = {
+          id: new Date().toISOString(),
+          title: titleInput.value,
+          location: locationInput.value
+        };
+        writeData('sync-posts', post)
+          .then(function () {
+            return sw.sync.register('sync-new-posts');
+          })
+          .then(function () {
+            const snackbarContainer = document.querySelector('#confirmation-toast');
+            const data = {
+              message: 'Your Post was saved for syncing!'
+            };
+            snackbarContainer.MaterialSnackbar.showSnackbar(data);
+          })
+          .catch(function (err) {
+            console.log('In syncManager ', err);
+          });
+      });
+  } else {
+    sendPostData();
+  }
+});
 
 //TO UNregister all SW
 // if ('serviceWorker' in navigator) {

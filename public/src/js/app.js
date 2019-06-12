@@ -1,4 +1,4 @@
-
+let deferredPrompt;
 
 
 if ('serviceWorker' in navigator) {

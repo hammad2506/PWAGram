@@ -127,7 +127,10 @@ self.addEventListener('sync', function (event) {
             .then(function (res) {
               console.log('Sent data', res);
               if (res.ok) {
-                deleteItemFromData('sync-posts', dt.id);
+                res.json()
+                .then(function(resData) {
+                  deleteItemFromData('sync-posts', resData.id);
+                });
               }
             })
             .catch(function (err) {
@@ -138,11 +141,6 @@ self.addEventListener('sync', function (event) {
     );
   }
 });
-
-
-
-
-
 
 //helper functions
 

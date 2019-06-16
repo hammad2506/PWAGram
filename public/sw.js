@@ -142,6 +142,70 @@ self.addEventListener('sync', function (event) {
   }
 });
 
+self.addEventListener('notificationclick', function(event) {
+  const notification = event.notification;
+  const action = event.action;
+
+  console.log(notification);
+  console.log(action);
+
+  if (action === 'confirm') {
+    console.log('Confirm was chosen');
+    notification.close();
+  } else {
+    console.log(action);
+    event.waitUntil(
+      clients.matchAll()
+        .then(function(clis) {
+          const client = clis.find(function(c) {
+            return c.visibilityState === 'visible';
+          });
+
+          if (client !== undefined) {
+            client.navigate(notification.data.url);
+            client.focus();
+          } else {
+            clients.openWindow(notification.data.url);
+          }
+          notification.close();
+        })
+    );
+  }
+});
+
+
+//Notifications
+self.addEventListener('notificationclose', function(event) {
+  console.log('Notification was closed', event);
+});
+
+//Push Manager
+self.addEventListener('push', function(event) {
+  console.log('Push Notification received', event);
+
+  let data = {title: 'New!', content: 'Something new happened!', openUrl: '/'};
+
+  if (event.data) {
+    data = JSON.parse(event.data.text());
+  }
+
+  const options = {
+    body: data.content,
+    icon: '/src/images/icons/app-icon-96x96.png',
+    badge: '/src/images/icons/app-icon-96x96.png',
+    data: {
+      url: data.openUrl
+    }
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(data.title, options)
+  );
+});
+
+
+
+
 //helper functions
 
 //Checks to see if provided string is part of the provided array. If the asset is from the same domain, we only use the substring following our domain

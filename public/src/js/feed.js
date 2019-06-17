@@ -33,7 +33,7 @@ locationBtn.addEventListener('click', function (event) {
     locationLoader.style.display = 'none';
 
     fetchedLocation.lat = position.coords.latitude,
-      fetchedLocation.lng = position.coords.latitude
+    fetchedLocation.lng = position.coords.longitude
 
     reverseGeocoding(fetchedLocation.lat, fetchedLocation.lng)
       .then((geocodedLocation) => {
@@ -54,10 +54,10 @@ locationBtn.addEventListener('click', function (event) {
       alert('Couldn\'t fetch location, please enter manually!');
       sawAlert = true;
     }
-    fetchedLocation = {
-      lat: 0,
-      lng: 0
-    };
+    
+    fetchedLocation.lat = position.coords.latitude,
+    fetchedLocation.lng = position.coords.longitude
+
   }, {
     timeout: 7000
   });
@@ -118,7 +118,6 @@ captureButton.onclick = function (event) {
 
 imagePicker.onchange = function (event) { //uploading picture from local directory
   picture = event.target.files[0];
-  console.log(picture);
 };
 
 function openCreatePostModal() {
@@ -259,15 +258,15 @@ if ('indexedDB' in window) {
 
 }
 
-function sendPostData(pictureBlob) {
+function sendPostData(title, location, rawLocation, pictureBlob) {
   console.log("sending data");
   const id = new Date().toISOString();
   const postData = new FormData();
   postData.append('id', id);
-  postData.append('title', titleInput.value);
-  postData.append('location', locationInput.value);
-  postData.append('rawLocationLat', fetchedLocation.lat);
-  postData.append('rawLocationLng', fetchedLocation.lng);
+  postData.append('title', title);
+  postData.append('location', location);
+  postData.append('rawLocationLat', rawLocation.lat);
+  postData.append('rawLocationLng', rawLocation.lng);
   postData.append('file', pictureBlob, id + '.png');
 
   fetch('https://us-central1-pwagram-34724.cloudfunctions.net/storePostData', {
@@ -291,7 +290,13 @@ form.addEventListener('submit', function (event) {
     return;
   }
 
-  const pictureBlob = picture; //will set picture to null in closeCreatePostModal
+  const title = titleInput.value;
+  const location = locationInput.value;
+  const rawLocation = {};
+  rawLocation.lat = fetchedLocation.lat;
+  rawLocation.lng = fetchedLocation.lng;
+  const pictureBlob = picture;
+
   closeCreatePostModal();
 
   if ('serviceWorker' in navigator && 'SyncManager' in window) {
@@ -299,10 +304,10 @@ form.addEventListener('submit', function (event) {
       .then(function (sw) {
         const post = {
           id: new Date().toISOString(),
-          title: titleInput.value,
-          location: locationInput.value,
+          title: title,
+          location: location,
           picture: pictureBlob,
-          rawLocation: fetchedLocation
+          rawLocation: rawLocation
         };
         writeData('sync-posts', post)
           .then(function () {
@@ -320,7 +325,7 @@ form.addEventListener('submit', function (event) {
           });
       });
   } else {
-    sendPostData(pictureBlob);
+    sendPostData(title, location, rawLocation, pictureBlob);
   }
 });
 

@@ -78,12 +78,13 @@ function urlBase64ToUint8Array(base64String) {
     fetch(`https://us1.locationiq.com/v1/reverse.php?key=${LOCATION_IQ_API_KEY}&lat=${lat}&lon=${lng}&format=json`)
       .then(res => res.json())
       .then(response => {
-        if (response.name && response.city) {
-          return response.name + ", " + response.city;
-        } else if (response.road && response.city) {
-          return response.road + ", " + response.city;
-        } else if (response.city) {
-          return response.city + ", " + response.country;
+        console.log(response);
+        if (response.address.name && response.address.city) {
+          return response.address.name + ", " + response.address.city;
+        } else if (response.address.road && response.address.city) {
+          return response.address.road + ", " + response.address.city;
+        } else if (response.address.city && response.address.country) {
+          return response.address.city + ", " + response.address.country;
         } else if (response.country || response.address.country){
           return response.country || response.address.country;
         } else {

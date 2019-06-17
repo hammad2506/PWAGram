@@ -1,15 +1,15 @@
 importScripts('/src/js/idb.js');
-importScripts('/src/js/idb-utils.js');
+importScripts('/src/js/utility.js');
 
-const CACHE_STATIC_NAME = 'static-v1';
-const CACHE_DYNAMIC_NAME = 'dynamic-v1';
+const CACHE_STATIC_NAME = 'static-v2';
+const CACHE_DYNAMIC_NAME = 'dynamic-v2';
 
 const STATIC_FILES = [
   '/',
   '/index.html',
   '/offline.html',
   '/src/js/idb.js',
-  '/src/js/idb-utils.js',
+  '/src/js/utility.js',
   '/src/js/app.js',
   '/src/js/feed.js',
   '/src/js/material.min.js',
@@ -111,18 +111,16 @@ self.addEventListener('sync', function (event) {
       readAllData('sync-posts')
       .then(function (data) {
         for (const dt of data) {
+          const postData = new FormData();
+          postData.append('id', dt.id);
+          postData.append('title', dt.title);
+          postData.append('location', dt.location);
+          postData.append('rawLocationLat', dt.rawLocation.lat);
+          postData.append('rawLocationLng', dt.rawLocation.lng);
+          postData.append('file', dt.picture, dt.id + '.png');
           fetch('https://us-central1-pwagram-34724.cloudfunctions.net/storePostData', {
               method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-              },
-              body: JSON.stringify({
-                id: dt.id,
-                title: dt.title,
-                location: dt.location,
-                image: 'https://firebasestorage.googleapis.com/v0/b/pwagram-34724.appspot.com/o/sf-boat.jpg?alt=media&token=5be32d7c-bfe0-46b0-9eda-3dc1e7fcf67b'
-              })
+              body: postData
             })
             .then(function (res) {
               console.log('Sent data', res);

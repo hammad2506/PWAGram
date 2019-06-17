@@ -1,0 +1,1 @@
+const LOCATION_IQ_API_KEY = "pk.f0861f095213e9a7cedfda1de1512412";

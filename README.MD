@@ -1,9 +1,28 @@
-# Progressive Web Apps - Complete Guide
-This source code is part of Maximilian Schwarzmüller's "Progressive Web Apps - Complete Guide" course on udemy.com.
+Instagram clonish built using the principles of progressive web app
 
-# How to Use
-You need [Node.js](https://nodejs.org) installed on your machine. Simply download the installer from [nodejs.org](https://nodejs.org) and go through the installation steps.
+Supports/Contains 
 
-Once Node.js is installed, open your command prompt or terminal and **navigate into this project folder**. There, run `npm install` to install all required dependencies.
+-Device camera
 
-Finally, run `npm start` to start the development server and visit [localhost:8080](http://localhost:8080) to see the running application.
+-Location API
+
+-Reverse Geolocation (LocationIQ)
+
+-Push Notifications (Push Manager)
+
+-Service workers
+
+-Offline Mode (Also for syncing new posts)
+
+-Caching
+
+-Indexed DB
+
+<br /> 
+<br /> 
+
+Contains base sw.js implementation and also wired up using workbox
+
+Using firebase for Database, Storage and Hosting.
+
+Deployed at: pwagram-34724.firebaseapp.com
